@@ -14,6 +14,7 @@ func main() {
 		f    = cli.Flag("-f, --show-full-path")
 		m    = cli.Flag("-m, --show-modified-date")
 		o    = cli.Option("-o, --order-by").Enum("releaseDate", "path", "releaseDate")
+		i    = cli.Flag("-i, --include-vendor")
 		args = cli.Args()
 	)
 
@@ -34,6 +35,7 @@ func main() {
 	cmd.SetShowModifiedDate(m)
 	cmd.SetShowFullPath(f)
 	cmd.SetOrderBy(o)
+	cmd.SetIncludeVendor(i)
 	cmd.SetPaths(args)
 	cmd.SetOutput(os.Stdout)
 	cmd.SetRoot(os.Getenv("HOME"))

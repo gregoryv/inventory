@@ -6,8 +6,9 @@ and this project adheres to http://semver.org/spec/v2.0.0.html.
 
 ## [unreleased]
 
-- Fix header order
+- Add flags -i, --include-vendor
 - Add flags -o, --order-by [path, releaseDate]
+- Fix header order
 
 ## [0.1.0] - 2022-04-15
 
