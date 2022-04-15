@@ -21,9 +21,10 @@ import (
 
 func main() {
 	var (
-		cli          = cmdline.NewBasicParser()
-		skipUntagged = cli.Flag("-s, --skip-untagged")
-		paths        = cli.Args()
+		cli              = cmdline.NewBasicParser()
+		skipUntagged     = cli.Flag("-s, --skip-untagged")
+		showModifiedDate = cli.Flag("-m, --show-modified-date")
+		paths            = cli.Args()
 	)
 	u := cli.Usage()
 	u.Preface("List projects and release information")
@@ -36,6 +37,7 @@ func main() {
 
 	var cmd InventoryCmd
 	cmd.SetSkipUntagged(skipUntagged)
+	cmd.SetShowModifiedDate(showModifiedDate)
 	cmd.SetPaths(paths)
 	cmd.SetOutput(os.Stdout)
 	if err := cmd.Run(); err != nil {
@@ -82,7 +84,7 @@ func (me *InventoryCmd) format(result []Project) {
 		}
 		fmt.Fprintln(w, strings.Join(parts, " "))
 	}
-	fmt.Fprintf(w, "# %v projects\n", len(result))
+	fmt.Fprintf(w, "# showing %v of %v projects\n", len(result), len(me.Paths()))
 }
 
 func (me *InventoryCmd) Header() string {
@@ -94,9 +96,10 @@ func (me *InventoryCmd) Header() string {
 	return buf.String()
 }
 
-func (me *InventoryCmd) SetSkipUntagged(v bool) { me.skipUntagged = v }
-func (me *InventoryCmd) SetPaths(v []string)    { me.paths = v }
-func (me *InventoryCmd) SetOutput(v io.Writer)  { me.out = v }
+func (me *InventoryCmd) SetSkipUntagged(v bool)     { me.skipUntagged = v }
+func (me *InventoryCmd) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
+func (me *InventoryCmd) SetPaths(v []string)        { me.paths = v }
+func (me *InventoryCmd) SetOutput(v io.Writer)      { me.out = v }
 
 func (me *InventoryCmd) Paths() []string { return me.paths }
 
