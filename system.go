@@ -21,6 +21,7 @@ type System struct {
 	skipUntagged     bool
 	showModifiedDate bool
 	showFullPath     bool
+	orderBy          string
 
 	root  string
 	paths []string
@@ -30,6 +31,7 @@ type System struct {
 func (me *System) SetSkipUntagged(v bool)     { me.skipUntagged = v }
 func (me *System) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
 func (me *System) SetShowFullPath(v bool)     { me.showFullPath = v }
+func (me *System) SetOrderBy(v string)        { me.orderBy = v }
 
 func (me *System) SetPaths(v []string)   { me.paths = v }
 func (me *System) SetOutput(v io.Writer) { me.out = v }
@@ -54,6 +56,7 @@ func (me *System) Run() {
 		result = append(result, p)
 	}
 
+	me.order(result)
 	me.format(result)
 }
 
@@ -92,6 +95,15 @@ func latestCommitDate(repodir string) string {
 	sec, _ := strconv.Atoi(string(date))
 	time := time.Unix(int64(sec), 0)
 	return time.Format("2006-01-02")
+}
+
+func (me *System) order(result []Project) {
+	switch me.orderBy {
+	case "path":
+		sort.Sort(byPath(result))
+	case "releaseDate":
+		sort.Sort(byReleaseDate(result))
+	}
 }
 
 func (me *System) format(result []Project) {
