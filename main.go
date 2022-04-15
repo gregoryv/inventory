@@ -17,24 +17,23 @@ import (
 
 func main() {
 	var (
-		cli = cmdline.NewBasicParser()
+		cli   = cmdline.NewBasicParser()
+		repos = cli.Args()
+	)
+	u := cli.Usage()
+	u.Preface("List projects and release information")
+
+	u.Example(
+		"List all your projects",
+		"$ inventory $HOME/src/github.com/YOURS/*",
 	)
 	cli.Parse()
-	repos, _ := filepath.Glob("/home/gregory/src/github.com/gregoryv/*")
 	var i int
 	for _, repodir := range repos {
 		i++
 		v := latestVersion(repodir)
 		date := latestCommitDate(repodir)
 		fmt.Printf("%s %s/%s %s\n", date, "gregoryv", filepath.Base(repodir), v)
-	}
-
-	repos, _ = filepath.Glob("/home/gregory/src/xwing.7de.se/*")
-	for _, repodir := range repos {
-		i++
-		v := latestVersion(repodir)
-		date := latestCommitDate(repodir)
-		fmt.Printf("%s %s/%s %s\n", date, "7de.se", filepath.Base(repodir), v)
 	}
 }
 
