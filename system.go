@@ -34,20 +34,7 @@ func (me *System) SetRoot(v string)           { me.root = v }
 
 func (me *System) Run() error {
 	if len(me.paths) == 0 {
-		// find all project directories
-		filepath.Walk(me.root, func(pth string, f os.FileInfo, err error) error {
-			if f == nil || !f.IsDir() {
-				return nil
-			}
-			if path.Base(pth) == "pkg" {
-				return filepath.SkipDir
-			}
-			if f.Name() == ".git" {
-				me.paths = append(me.paths, filepath.Dir(pth))
-				return filepath.SkipDir
-			}
-			return nil
-		})
+		me.findProjectPaths()
 	}
 
 	result := make([]Project, 0)
@@ -66,6 +53,43 @@ func (me *System) Run() error {
 
 	me.format(result)
 	return nil
+}
+
+func (me *System) findProjectPaths() {
+	filepath.Walk(me.root, func(pth string, f os.FileInfo, err error) error {
+		if f == nil || !f.IsDir() {
+			return nil
+		}
+		if path.Base(pth) == "pkg" {
+			return filepath.SkipDir
+		}
+		if f.Name() == ".git" {
+			me.paths = append(me.paths, filepath.Dir(pth))
+			return filepath.SkipDir
+		}
+		return nil
+	})
+}
+
+func latestTag(repodir string) (Tag, error) {
+	tags := tags(repodir)
+	if len(tags) == 0 {
+		return NoTag, ErrNoTags
+	}
+	sort.Sort(Tags(tags))
+	return tags[0], nil
+}
+
+func latestCommitDate(repodir string) string {
+	date, err := exec.Command("git", "-C", repodir, "log", "-1", "--format=%ct").Output()
+	if err != nil {
+		log.Println(repodir, err)
+		return ""
+	}
+	date = bytes.TrimRight(date, "\n")
+	sec, _ := strconv.Atoi(string(date))
+	time := time.Unix(int64(sec), 0)
+	return time.Format("2006-01-02")
 }
 
 func (me *System) format(result []Project) {
@@ -90,27 +114,6 @@ func (me *System) Header() string {
 		buf.WriteString(" Modified")
 	}
 	return buf.String()
-}
-
-func latestCommitDate(repodir string) string {
-	date, err := exec.Command("git", "-C", repodir, "log", "-1", "--format=%ct").Output()
-	if err != nil {
-		log.Println(repodir, err)
-		return ""
-	}
-	date = bytes.TrimRight(date, "\n")
-	sec, _ := strconv.Atoi(string(date))
-	time := time.Unix(int64(sec), 0)
-	return time.Format("2006-01-02")
-}
-
-func latestTag(repodir string) (Tag, error) {
-	tags := tags(repodir)
-	if len(tags) == 0 {
-		return NoTag, ErrNoTags
-	}
-	sort.Sort(Tags(tags))
-	return tags[0], nil
 }
 
 var NoTag = Tag{
