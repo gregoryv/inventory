@@ -98,24 +98,26 @@ func latestVersion(repodir string) (string, error) {
 		return "v0.0.0", ErrNoTags
 	}
 	sort.Sort(Tags(tags))
-	return tags[0], nil
+	return tags[0].Name(), nil
 }
 
 var ErrNoTags = errors.New("no tags")
 
-func tags(repodir string) []string {
-	res := make([]string, 0)
+func tags(repodir string) []Tag {
+	res := make([]Tag, 0)
 	// todo use: git for-each-ref --format='%(tag) %(taggerdate:short)' refs/tags
 	tags, err := exec.Command("git", "-C", repodir, "tag").Output()
 	if err != nil {
 		log.Println(repodir, err)
 		return res
 	}
-	for _, tag := range bytes.Split(tags, []byte("\n")) {
-		if len(tag) == 0 {
+	for _, name := range bytes.Split(tags, []byte("\n")) {
+		if len(name) == 0 {
 			continue
 		}
-		res = append(res, string(tag))
+		var t Tag
+		t.SetName(string(name))
+		res = append(res, t)
 	}
 	return res
 }
@@ -138,13 +140,13 @@ func (me *Project) Version() string      { return me.version }
 
 // ----------------------------------------
 
-type Tags []string
+type Tags []Tag
 
 func (s Tags) Len() int      { return len(s) }
 func (s Tags) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s Tags) Less(i, j int) bool {
-	a := semver.New(parseVersion(s[i]))
-	b := semver.New(parseVersion(s[j]))
+	a := semver.New(parseVersion(s[i].Name()))
+	b := semver.New(parseVersion(s[j].Name()))
 	return b.LessThan(*a)
 }
 
