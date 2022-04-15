@@ -55,7 +55,7 @@ type InventoryCmd struct {
 
 func (me *InventoryCmd) Run() error {
 	result := make([]Project, 0)
-	for _, dir := range me.Paths() {
+	for _, dir := range me.paths {
 		tag, err := latestTag(dir)
 		if errors.Is(ErrNoTags, err) && me.skipUntagged {
 			continue
@@ -84,7 +84,7 @@ func (me *InventoryCmd) format(result []Project) {
 		}
 		fmt.Fprintln(w, strings.Join(parts, " "))
 	}
-	fmt.Fprintf(w, "# showing %v of %v projects\n", len(result), len(me.Paths()))
+	fmt.Fprintf(w, "# showing %v of %v projects\n", len(result), len(me.paths))
 }
 
 func (me *InventoryCmd) Header() string {
@@ -100,8 +100,6 @@ func (me *InventoryCmd) SetSkipUntagged(v bool)     { me.skipUntagged = v }
 func (me *InventoryCmd) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
 func (me *InventoryCmd) SetPaths(v []string)        { me.paths = v }
 func (me *InventoryCmd) SetOutput(v io.Writer)      { me.out = v }
-
-func (me *InventoryCmd) Paths() []string { return me.paths }
 
 func latestCommitDate(repodir string) string {
 	date, err := exec.Command("git", "-C", repodir, "log", "-1", "--format=%ct").Output()
