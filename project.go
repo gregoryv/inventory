@@ -23,6 +23,24 @@ func (me *Project) ReleaseDate() string  { return me.latest.date }
 
 // ----------------------------------------
 
+type byReleaseDate []Project
+
+func (s byReleaseDate) Len() int      { return len(s) }
+func (s byReleaseDate) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s byReleaseDate) Less(i, j int) bool {
+	return s[i].ReleaseDate() < s[j].ReleaseDate()
+}
+
+type byPath []Project
+
+func (s byPath) Len() int      { return len(s) }
+func (s byPath) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s byPath) Less(i, j int) bool {
+	return s[i].Path() < s[j].Path()
+}
+
+// ----------------------------------------
+
 type Tags []Tag
 
 func (s Tags) Len() int      { return len(s) }
