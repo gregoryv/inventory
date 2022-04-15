@@ -52,7 +52,7 @@ type InventoryCmd struct {
 func (me *InventoryCmd) Run() error {
 	result := make([]Project, 0)
 	for _, dir := range me.Paths() {
-		version, err := latestVersion(dir)
+		tag, err := latestTag(dir)
 		if errors.Is(ErrNoTags, err) && me.skipUntagged {
 			continue
 		}
@@ -60,7 +60,7 @@ func (me *InventoryCmd) Run() error {
 		var p Project
 		p.SetLastModified(date)
 		p.SetPath(dir)
-		p.SetVersion(version)
+		p.SetVersion(tag.Name())
 		result = append(result, p)
 	}
 
@@ -93,15 +93,16 @@ func latestCommitDate(repodir string) string {
 	return time.Format("2006-01-02")
 }
 
-func latestVersion(repodir string) (string, error) {
+func latestTag(repodir string) (Tag, error) {
 	tags := tags(repodir)
 	if len(tags) == 0 {
-		return "v0.0.0", ErrNoTags
+		return NoTag, ErrNoTags
 	}
 	sort.Sort(Tags(tags))
-	return tags[0].Name(), nil
+	return tags[0], nil
 }
 
+var NoTag = Tag{name: "v0.0.0"}
 var ErrNoTags = errors.New("no tags")
 
 func tags(repodir string) []Tag {
