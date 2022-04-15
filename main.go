@@ -60,7 +60,7 @@ func (me *InventoryCmd) Run() error {
 		var p Project
 		p.SetLastModified(date)
 		p.SetPath(dir)
-		p.SetVersion(tag.Name())
+		p.SetLatest(tag)
 		result = append(result, p)
 	}
 
@@ -135,16 +135,16 @@ func tags(repodir string) []Tag {
 type Project struct {
 	lastModified string
 	path         string
-	version      string
+	latest       Tag
 }
 
 func (me *Project) SetLastModified(v string) { me.lastModified = v }
 func (me *Project) SetPath(v string)         { me.path = v }
-func (me *Project) SetVersion(v string)      { me.version = v }
+func (me *Project) SetLatest(v Tag)          { me.latest = v }
 
 func (me *Project) LastModified() string { return me.lastModified }
 func (me *Project) Path() string         { return me.path }
-func (me *Project) Version() string      { return me.version }
+func (me *Project) Version() string      { return me.latest.Name() }
 
 // ----------------------------------------
 
