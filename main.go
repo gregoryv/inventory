@@ -32,6 +32,10 @@ func main() {
 	u.Preface("List projects and release information")
 	u.Example(
 		"List all your projects",
+		"$ inventory",
+	)
+	u.Example(
+		"List specific projects",
 		"$ inventory $HOME/src/github.com/YOURS/*",
 	)
 	cli.Parse()
@@ -95,7 +99,9 @@ func (me *InventoryCmd) Run() error {
 
 func (me *InventoryCmd) format(result []Project) {
 	w := me.out
+	fmt.Fprintf(w, "# Showing %v of %v projects\n", len(result), len(me.paths))
 	fmt.Fprintln(w, me.Header())
+
 	for _, p := range result {
 		path := filepath.Base(p.Path())
 		parts := []string{p.ReleaseDate(), path, p.Version()}
@@ -104,7 +110,6 @@ func (me *InventoryCmd) format(result []Project) {
 		}
 		fmt.Fprintln(w, strings.Join(parts, " "))
 	}
-	fmt.Fprintf(w, "# showing %v of %v projects\n", len(result), len(me.paths))
 }
 
 func (me *InventoryCmd) Header() string {
