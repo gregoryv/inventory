@@ -5,6 +5,7 @@ their release information.
 
 ## Quick start
 
-`$ go install github.com/gregoryv/inventory
+```shell
+$ go install github.com/gregoryv/inventory
 $ inventory -h 
-`
+```
