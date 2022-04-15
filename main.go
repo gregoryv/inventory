@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -50,8 +51,11 @@ type InventoryCmd struct {
 func (me *InventoryCmd) Run() error {
 	var i int
 	for _, dir := range me.Paths() {
+		version, err := latestVersion(dir)
+		if errors.Is(ErrNoTags, err) && me.skipUntagged {
+			continue
+		}
 		i++
-		version := latestVersion(dir)
 		date := latestCommitDate(dir)
 		me.print(i, date, dir, version)
 	}
@@ -81,14 +85,16 @@ func latestCommitDate(repodir string) string {
 	return time.Format("2006-01-02")
 }
 
-func latestVersion(repodir string) string {
+func latestVersion(repodir string) (string, error) {
 	tags := tags(repodir)
 	if len(tags) == 0 {
-		return "v0.0.0"
+		return "v0.0.0", ErrNoTags
 	}
 	sort.Sort(Tags(tags))
-	return tags[0]
+	return tags[0], nil
 }
+
+var ErrNoTags = errors.New("no tags")
 
 func tags(repodir string) []string {
 	res := make([]string, 0)
