@@ -49,19 +49,25 @@ type InventoryCmd struct {
 
 func (me *InventoryCmd) Run() error {
 	var i int
-	for _, repodir := range me.paths {
+	for _, dir := range me.Paths() {
 		i++
-		v := latestVersion(repodir)
-		date := latestCommitDate(repodir)
-		// todo not gregoryv
-		fmt.Fprintf(me.out, "%s %s/%s %s\n", date, "gregoryv", filepath.Base(repodir), v)
+		version := latestVersion(dir)
+		date := latestCommitDate(dir)
+		me.print(i, date, dir, version)
 	}
 	return nil
+}
+
+func (me *InventoryCmd) print(i int, date, dir, version string) {
+	ref := filepath.Base(dir)
+	fmt.Fprintf(me.out, "%v %s %s %s\n", i, date, ref, version)
 }
 
 func (me *InventoryCmd) SetSkipUntagged(v bool) { me.skipUntagged = v }
 func (me *InventoryCmd) SetPaths(v []string)    { me.paths = v }
 func (me *InventoryCmd) SetOutput(v io.Writer)  { me.out = v }
+
+func (me *InventoryCmd) Paths() []string { return me.paths }
 
 func latestCommitDate(repodir string) string {
 	date, err := exec.Command("git", "-C", repodir, "log", "-1", "--format=%ct").Output()
