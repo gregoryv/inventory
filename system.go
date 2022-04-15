@@ -20,6 +20,7 @@ import (
 type System struct {
 	skipUntagged     bool
 	showModifiedDate bool
+	showFullPath     bool
 
 	root  string
 	paths []string
@@ -28,9 +29,11 @@ type System struct {
 
 func (me *System) SetSkipUntagged(v bool)     { me.skipUntagged = v }
 func (me *System) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
-func (me *System) SetPaths(v []string)        { me.paths = v }
-func (me *System) SetOutput(v io.Writer)      { me.out = v }
-func (me *System) SetRoot(v string)           { me.root = v }
+func (me *System) SetShowFullPath(v bool)     { me.showFullPath = v }
+
+func (me *System) SetPaths(v []string)   { me.paths = v }
+func (me *System) SetOutput(v io.Writer) { me.out = v }
+func (me *System) SetRoot(v string)      { me.root = v }
 
 func (me *System) Run() {
 	if len(me.paths) == 0 {
@@ -97,7 +100,10 @@ func (me *System) format(result []Project) {
 	fmt.Fprintln(w, me.Header())
 
 	for _, p := range result {
-		path := filepath.Base(p.Path())
+		path := p.Path()
+		if !me.showFullPath {
+			path = filepath.Base(p.Path())
+		}
 		parts := []string{p.ReleaseDate(), path, p.Version()}
 		if me.showModifiedDate {
 			parts = append(parts, p.LastModified())
