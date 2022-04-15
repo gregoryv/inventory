@@ -21,14 +21,14 @@ import (
 
 func main() {
 	var (
-		cli              = cmdline.NewBasicParser()
-		skipUntagged     = cli.Flag("-s, --skip-untagged")
-		showModifiedDate = cli.Flag("-m, --show-modified-date")
-		paths            = cli.Args()
+		cli  = cmdline.NewBasicParser()
+		s    = cli.Flag("-s, --skip-untagged")
+		m    = cli.Flag("-m, --show-modified-date")
+		args = cli.Args()
 	)
+
 	u := cli.Usage()
 	u.Preface("List projects and release information")
-
 	u.Example(
 		"List all your projects",
 		"$ inventory $HOME/src/github.com/YOURS/*",
@@ -36,10 +36,11 @@ func main() {
 	cli.Parse()
 
 	var cmd InventoryCmd
-	cmd.SetSkipUntagged(skipUntagged)
-	cmd.SetShowModifiedDate(showModifiedDate)
-	cmd.SetPaths(paths)
+	cmd.SetSkipUntagged(s)
+	cmd.SetShowModifiedDate(m)
+	cmd.SetPaths(args)
 	cmd.SetOutput(os.Stdout)
+
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
