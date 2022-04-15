@@ -113,7 +113,10 @@ func latestTag(repodir string) (Tag, error) {
 	return tags[0], nil
 }
 
-var NoTag = Tag{name: "v0.0.0"}
+var NoTag = Tag{
+	name: "v0.0.0",
+	date: "0000-00-00",
+}
 var ErrNoTags = errors.New("no tags")
 
 func tags(repodir string) []Tag {
