@@ -22,6 +22,7 @@ type System struct {
 	showModifiedDate bool
 	showFullPath     bool
 	orderBy          string
+	includeVendor    bool
 
 	root  string
 	paths []string
@@ -32,6 +33,7 @@ func (me *System) SetSkipUntagged(v bool)     { me.skipUntagged = v }
 func (me *System) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
 func (me *System) SetShowFullPath(v bool)     { me.showFullPath = v }
 func (me *System) SetOrderBy(v string)        { me.orderBy = v }
+func (me *System) SetIncludeVendor(v bool)    { me.includeVendor = v }
 
 func (me *System) SetPaths(v []string)   { me.paths = v }
 func (me *System) SetOutput(v io.Writer) { me.out = v }
@@ -65,7 +67,7 @@ func (me *System) findProjectPaths() {
 		if f == nil || !f.IsDir() {
 			return nil
 		}
-		if path.Base(pth) == "pkg" {
+		if b := path.Base(pth); b == "pkg" || (b == "vendor" && !me.includeVendor) {
 			return filepath.SkipDir
 		}
 		if f.Name() == ".git" {
