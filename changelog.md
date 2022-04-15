@@ -6,6 +6,7 @@ and this project adheres to http://semver.org/spec/v2.0.0.html.
 
 ## [unreleased]
 
+- Fix header order
 - Add flags -o, --order-by [path, releaseDate]
 
 ## [0.1.0] - 2022-04-15

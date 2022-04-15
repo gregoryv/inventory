@@ -126,9 +126,9 @@ func (me *System) format(result []Project) {
 
 func (me *System) Header() string {
 	var buf bytes.Buffer
-	buf.WriteString("# Released Version Project")
+	buf.WriteString("# ReleaseDate Project Version")
 	if me.showModifiedDate {
-		buf.WriteString(" Modified")
+		buf.WriteString(" ModifiedDate")
 	}
 	return buf.String()
 }
