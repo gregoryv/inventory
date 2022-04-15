@@ -105,6 +105,7 @@ var ErrNoTags = errors.New("no tags")
 
 func tags(repodir string) []string {
 	res := make([]string, 0)
+	// todo use: git for-each-ref --format='%(tag) %(taggerdate:short)' refs/tags
 	tags, err := exec.Command("git", "-C", repodir, "tag").Output()
 	if err != nil {
 		log.Println(repodir, err)
@@ -159,3 +160,16 @@ func parseVersion(v string) string {
 	fmt.Sscanf(v, "v%v.%v.%v", &major, &minor, &patch)
 	return fmt.Sprintf("%v.%v.%v", major, minor, patch)
 }
+
+// ----------------------------------------
+
+type Tag struct {
+	name string
+	date string
+}
+
+func (me *Tag) SetName(v string) { me.name = v }
+func (me *Tag) SetDate(v string) { me.date = v }
+
+func (me *Tag) Name() string { return me.name }
+func (me *Tag) Date() string { return me.date }
