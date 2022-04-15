@@ -40,7 +40,7 @@ func main() {
 	)
 	cli.Parse()
 
-	var cmd InventoryCmd
+	var cmd System
 	cmd.SetSkipUntagged(s)
 	cmd.SetShowModifiedDate(m)
 	cmd.SetPaths(args)
@@ -52,7 +52,7 @@ func main() {
 	}
 }
 
-type InventoryCmd struct {
+type System struct {
 	skipUntagged     bool
 	showModifiedDate bool
 
@@ -61,13 +61,13 @@ type InventoryCmd struct {
 	out   io.Writer
 }
 
-func (me *InventoryCmd) SetSkipUntagged(v bool)     { me.skipUntagged = v }
-func (me *InventoryCmd) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
-func (me *InventoryCmd) SetPaths(v []string)        { me.paths = v }
-func (me *InventoryCmd) SetOutput(v io.Writer)      { me.out = v }
-func (me *InventoryCmd) SetRoot(v string)           { me.root = v }
+func (me *System) SetSkipUntagged(v bool)     { me.skipUntagged = v }
+func (me *System) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
+func (me *System) SetPaths(v []string)        { me.paths = v }
+func (me *System) SetOutput(v io.Writer)      { me.out = v }
+func (me *System) SetRoot(v string)           { me.root = v }
 
-func (me *InventoryCmd) Run() error {
+func (me *System) Run() error {
 	if len(me.paths) == 0 {
 		// find all project directories
 		filepath.Walk(me.root, func(pth string, f os.FileInfo, err error) error {
@@ -103,7 +103,7 @@ func (me *InventoryCmd) Run() error {
 	return nil
 }
 
-func (me *InventoryCmd) format(result []Project) {
+func (me *System) format(result []Project) {
 	w := me.out
 	fmt.Fprintf(w, "# Showing %v of %v projects\n", len(result), len(me.paths))
 	fmt.Fprintln(w, me.Header())
@@ -118,7 +118,7 @@ func (me *InventoryCmd) format(result []Project) {
 	}
 }
 
-func (me *InventoryCmd) Header() string {
+func (me *System) Header() string {
 	var buf bytes.Buffer
 	buf.WriteString("# Released Version Project")
 	if me.showModifiedDate {
