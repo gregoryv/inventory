@@ -44,9 +44,11 @@ func main() {
 }
 
 type InventoryCmd struct {
-	skipUntagged bool
-	paths        []string
-	out          io.Writer
+	skipUntagged     bool
+	showModifiedDate bool
+
+	paths []string
+	out   io.Writer
 }
 
 func (me *InventoryCmd) Run() error {
@@ -64,15 +66,32 @@ func (me *InventoryCmd) Run() error {
 		result = append(result, p)
 	}
 
-	me.output(result)
+	me.format(result)
 	return nil
 }
 
-func (me *InventoryCmd) output(result []Project) {
-	for i, p := range result {
-		ref := filepath.Base(p.Path())
-		fmt.Fprintf(me.out, "%v %s %s %s\n", i, p.LastModified(), ref, p.Version())
+func (me *InventoryCmd) format(result []Project) {
+	w := me.out
+
+	fmt.Fprintln(w, me.Header())
+	for _, p := range result {
+		path := filepath.Base(p.Path())
+		parts := []string{p.ReleaseDate(), path, p.Version()}
+		if me.showModifiedDate {
+			parts = append(parts, p.LastModified())
+		}
+		fmt.Fprintln(w, strings.Join(parts, " "))
 	}
+	fmt.Fprintf(w, "# %v projects\n", len(result))
+}
+
+func (me *InventoryCmd) Header() string {
+	var buf bytes.Buffer
+	buf.WriteString("# Released Version Project")
+	if me.showModifiedDate {
+		buf.WriteString(" Modified")
+	}
+	return buf.String()
 }
 
 func (me *InventoryCmd) SetSkipUntagged(v bool) { me.skipUntagged = v }
@@ -145,6 +164,7 @@ func (me *Project) SetLatest(v Tag)          { me.latest = v }
 func (me *Project) LastModified() string { return me.lastModified }
 func (me *Project) Path() string         { return me.path }
 func (me *Project) Version() string      { return me.latest.Name() }
+func (me *Project) ReleaseDate() string  { return me.latest.Date() }
 
 // ----------------------------------------
 
