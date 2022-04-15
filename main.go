@@ -4,7 +4,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -17,8 +19,9 @@ import (
 
 func main() {
 	var (
-		cli   = cmdline.NewBasicParser()
-		repos = cli.Args()
+		cli          = cmdline.NewBasicParser()
+		skipUntagged = cli.Flag("-s, --skip-untagged")
+		paths        = cli.Args()
 	)
 	u := cli.Usage()
 	u.Preface("List projects and release information")
@@ -28,14 +31,37 @@ func main() {
 		"$ inventory $HOME/src/github.com/YOURS/*",
 	)
 	cli.Parse()
+
+	var cmd InventoryCmd
+	cmd.SetSkipUntagged(skipUntagged)
+	cmd.SetPaths(paths)
+	cmd.SetOutput(os.Stdout)
+	if err := cmd.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+type InventoryCmd struct {
+	skipUntagged bool
+	paths        []string
+	out          io.Writer
+}
+
+func (me *InventoryCmd) Run() error {
 	var i int
-	for _, repodir := range repos {
+	for _, repodir := range me.paths {
 		i++
 		v := latestVersion(repodir)
 		date := latestCommitDate(repodir)
-		fmt.Printf("%s %s/%s %s\n", date, "gregoryv", filepath.Base(repodir), v)
+		// todo not gregoryv
+		fmt.Fprintf(me.out, "%s %s/%s %s\n", date, "gregoryv", filepath.Base(repodir), v)
 	}
+	return nil
 }
+
+func (me *InventoryCmd) SetSkipUntagged(v bool) { me.skipUntagged = v }
+func (me *InventoryCmd) SetPaths(v []string)    { me.paths = v }
+func (me *InventoryCmd) SetOutput(v io.Writer)  { me.out = v }
 
 func latestCommitDate(repodir string) string {
 	date, err := exec.Command("git", "-C", repodir, "log", "-1", "--format=%ct").Output()
