@@ -74,7 +74,6 @@ func (me *InventoryCmd) Run() error {
 
 func (me *InventoryCmd) format(result []Project) {
 	w := me.out
-
 	fmt.Fprintln(w, me.Header())
 	for _, p := range result {
 		path := filepath.Base(p.Path())
@@ -142,9 +141,10 @@ func tags(repodir string) []Tag {
 		if len(fields) != 2 {
 			continue
 		}
-		var t Tag
-		t.SetName(fields[0])
-		t.SetDate(fields[1])
+		t := Tag{
+			name: fields[0],
+			date: fields[1],
+		}
 		res = append(res, t)
 	}
 	return res
@@ -164,8 +164,8 @@ func (me *Project) SetLatest(v Tag)          { me.latest = v }
 
 func (me *Project) LastModified() string { return me.lastModified }
 func (me *Project) Path() string         { return me.path }
-func (me *Project) Version() string      { return me.latest.Name() }
-func (me *Project) ReleaseDate() string  { return me.latest.Date() }
+func (me *Project) Version() string      { return me.latest.name }
+func (me *Project) ReleaseDate() string  { return me.latest.date }
 
 // ----------------------------------------
 
@@ -174,8 +174,8 @@ type Tags []Tag
 func (s Tags) Len() int      { return len(s) }
 func (s Tags) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s Tags) Less(i, j int) bool {
-	a := semver.New(parseVersion(s[i].Name()))
-	b := semver.New(parseVersion(s[j].Name()))
+	a := semver.New(parseVersion(s[i].name))
+	b := semver.New(parseVersion(s[j].name))
 	return b.LessThan(*a)
 }
 
@@ -198,9 +198,3 @@ type Tag struct {
 	name string
 	date string
 }
-
-func (me *Tag) SetName(v string) { me.name = v }
-func (me *Tag) SetDate(v string) { me.date = v }
-
-func (me *Tag) Name() string { return me.name }
-func (me *Tag) Date() string { return me.date }
