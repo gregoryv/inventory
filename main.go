@@ -49,22 +49,29 @@ type InventoryCmd struct {
 }
 
 func (me *InventoryCmd) Run() error {
-	var i int
+	result := make([]Project, 0)
 	for _, dir := range me.Paths() {
 		version, err := latestVersion(dir)
 		if errors.Is(ErrNoTags, err) && me.skipUntagged {
 			continue
 		}
-		i++
 		date := latestCommitDate(dir)
-		me.print(i, date, dir, version)
+		var p Project
+		p.SetLastModified(date)
+		p.SetPath(dir)
+		p.SetVersion(version)
+		result = append(result, p)
 	}
+
+	me.output(result)
 	return nil
 }
 
-func (me *InventoryCmd) print(i int, date, dir, version string) {
-	ref := filepath.Base(dir)
-	fmt.Fprintf(me.out, "%v %s %s %s\n", i, date, ref, version)
+func (me *InventoryCmd) output(result []Project) {
+	for i, p := range result {
+		ref := filepath.Base(p.Path())
+		fmt.Fprintf(me.out, "%v %s %s %s\n", i, p.LastModified(), ref, p.Version())
+	}
 }
 
 func (me *InventoryCmd) SetSkipUntagged(v bool) { me.skipUntagged = v }
@@ -111,6 +118,24 @@ func tags(repodir string) []string {
 	}
 	return res
 }
+
+// ----------------------------------------
+
+type Project struct {
+	lastModified string
+	path         string
+	version      string
+}
+
+func (me *Project) SetLastModified(v string) { me.lastModified = v }
+func (me *Project) SetPath(v string)         { me.path = v }
+func (me *Project) SetVersion(v string)      { me.version = v }
+
+func (me *Project) LastModified() string { return me.lastModified }
+func (me *Project) Path() string         { return me.path }
+func (me *Project) Version() string      { return me.version }
+
+// ----------------------------------------
 
 type Tags []string
 
