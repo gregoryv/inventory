@@ -61,6 +61,12 @@ type InventoryCmd struct {
 	out   io.Writer
 }
 
+func (me *InventoryCmd) SetSkipUntagged(v bool)     { me.skipUntagged = v }
+func (me *InventoryCmd) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
+func (me *InventoryCmd) SetPaths(v []string)        { me.paths = v }
+func (me *InventoryCmd) SetOutput(v io.Writer)      { me.out = v }
+func (me *InventoryCmd) SetRoot(v string)           { me.root = v }
+
 func (me *InventoryCmd) Run() error {
 	if len(me.paths) == 0 {
 		// find all project directories
@@ -120,12 +126,6 @@ func (me *InventoryCmd) Header() string {
 	}
 	return buf.String()
 }
-
-func (me *InventoryCmd) SetSkipUntagged(v bool)     { me.skipUntagged = v }
-func (me *InventoryCmd) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
-func (me *InventoryCmd) SetPaths(v []string)        { me.paths = v }
-func (me *InventoryCmd) SetOutput(v io.Writer)      { me.out = v }
-func (me *InventoryCmd) SetRoot(v string)           { me.root = v }
 
 func latestCommitDate(repodir string) string {
 	date, err := exec.Command("git", "-C", repodir, "log", "-1", "--format=%ct").Output()
