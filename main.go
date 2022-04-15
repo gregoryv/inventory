@@ -1,4 +1,4 @@
-// Command inventory prints the latest version of each repository
+// Command inventory prints project latest release information
 package main
 
 import (
@@ -12,9 +12,14 @@ import (
 	"time"
 
 	"github.com/coreos/go-semver/semver"
+	"github.com/gregoryv/cmdline"
 )
 
 func main() {
+	var (
+		cli = cmdline.NewBasicParser()
+	)
+	cli.Parse()
 	repos, _ := filepath.Glob("/home/gregory/src/github.com/gregoryv/*")
 	var i int
 	for _, repodir := range repos {
