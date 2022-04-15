@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -40,6 +41,7 @@ func main() {
 	cmd.SetShowModifiedDate(m)
 	cmd.SetPaths(args)
 	cmd.SetOutput(os.Stdout)
+	cmd.SetRoot(os.Getenv("HOME"))
 
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
@@ -50,11 +52,29 @@ type InventoryCmd struct {
 	skipUntagged     bool
 	showModifiedDate bool
 
+	root  string
 	paths []string
 	out   io.Writer
 }
 
 func (me *InventoryCmd) Run() error {
+	if len(me.paths) == 0 {
+		// find all project directories
+		filepath.Walk(me.root, func(pth string, f os.FileInfo, err error) error {
+			if f == nil || !f.IsDir() {
+				return nil
+			}
+			if path.Base(pth) == "pkg" {
+				return filepath.SkipDir
+			}
+			if f.Name() == ".git" {
+				me.paths = append(me.paths, filepath.Dir(pth))
+				return filepath.SkipDir
+			}
+			return nil
+		})
+	}
+
 	result := make([]Project, 0)
 	for _, dir := range me.paths {
 		tag, err := latestTag(dir)
@@ -100,6 +120,7 @@ func (me *InventoryCmd) SetSkipUntagged(v bool)     { me.skipUntagged = v }
 func (me *InventoryCmd) SetShowModifiedDate(v bool) { me.showModifiedDate = v }
 func (me *InventoryCmd) SetPaths(v []string)        { me.paths = v }
 func (me *InventoryCmd) SetOutput(v io.Writer)      { me.out = v }
+func (me *InventoryCmd) SetRoot(v string)           { me.root = v }
 
 func latestCommitDate(repodir string) string {
 	date, err := exec.Command("git", "-C", repodir, "log", "-1", "--format=%ct").Output()
