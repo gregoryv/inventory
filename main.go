@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/coreos/go-semver/semver"
@@ -105,18 +106,24 @@ var ErrNoTags = errors.New("no tags")
 
 func tags(repodir string) []Tag {
 	res := make([]Tag, 0)
-	// todo use: git for-each-ref --format='%(tag) %(taggerdate:short)' refs/tags
-	tags, err := exec.Command("git", "-C", repodir, "tag").Output()
+	tags, err := exec.Command("git", "-C", repodir,
+		"for-each-ref", "--format=%(tag) %(taggerdate:short)", "refs/tags",
+	).Output()
 	if err != nil {
 		log.Println(repodir, err)
 		return res
 	}
-	for _, name := range bytes.Split(tags, []byte("\n")) {
-		if len(name) == 0 {
+	for _, entry := range bytes.Split(tags, []byte("\n")) {
+		if len(entry) == 0 {
+			continue
+		}
+		fields := strings.Fields(string(entry))
+		if len(fields) != 2 {
 			continue
 		}
 		var t Tag
-		t.SetName(string(name))
+		t.SetName(fields[0])
+		t.SetDate(fields[1])
 		res = append(res, t)
 	}
 	return res
