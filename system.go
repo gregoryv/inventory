@@ -32,7 +32,7 @@ func (me *System) SetPaths(v []string)        { me.paths = v }
 func (me *System) SetOutput(v io.Writer)      { me.out = v }
 func (me *System) SetRoot(v string)           { me.root = v }
 
-func (me *System) Run() error {
+func (me *System) Run() {
 	if len(me.paths) == 0 {
 		me.findProjectPaths()
 	}
@@ -52,7 +52,6 @@ func (me *System) Run() error {
 	}
 
 	me.format(result)
-	return nil
 }
 
 func (me *System) findProjectPaths() {

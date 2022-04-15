@@ -2,7 +2,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"github.com/gregoryv/cmdline"
@@ -34,8 +33,5 @@ func main() {
 	cmd.SetPaths(args)
 	cmd.SetOutput(os.Stdout)
 	cmd.SetRoot(os.Getenv("HOME"))
-
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
+	cmd.Run()
 }
