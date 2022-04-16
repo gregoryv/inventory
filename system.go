@@ -107,7 +107,12 @@ func latestCommitDate(repodir string) string {
 }
 
 func (me *System) order(result []Project) {
-	switch me.orderBy {
+	orderBy("path", result)
+	orderBy(me.orderBy, result)
+}
+
+func orderBy(by string, result []Project) {
+	switch by {
 	case "path":
 		sort.Sort(byPath(result))
 	case "releaseDate":
