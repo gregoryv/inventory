@@ -17,6 +17,13 @@ import (
 	"time"
 )
 
+func NewSystem() *System {
+	return &System{
+		paths: []string{},
+		out:   os.Stdout,
+	}
+}
+
 type System struct {
 	skipUntagged     bool
 	showModifiedDate bool

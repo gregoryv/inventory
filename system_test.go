@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"testing"
@@ -49,4 +50,12 @@ func help(t testing.TB) []byte {
 		t.Fatal(err)
 	}
 	return buf.Bytes()
+}
+
+func TestSystem(t *testing.T) {
+	s := NewSystem()
+	s.SetPaths([]string{".", "."})
+	s.SetShowModifiedDate(true)
+	s.SetOutput(ioutil.Discard)
+	s.Run()
 }
