@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/coreos/go-semver/semver"
 )
 
@@ -44,16 +46,22 @@ type Tags []Tag
 func (s Tags) Len() int      { return len(s) }
 func (s Tags) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s Tags) Less(i, j int) bool {
-	a, err := semver.NewVersion(s[i].name)
-	if err != nil {
-		return false
-	}
-
-	b, err := semver.NewVersion(s[j].name)
-	if err != nil {
-		return false
-	}
+	a := semver.New(parseVersion(s[i].name))
+	b := semver.New(parseVersion(s[j].name))
 	return b.LessThan(*a)
+}
+
+func parseVersion(v string) string {
+	if len(v) == 0 {
+		return ""
+	}
+	var (
+		major int
+		minor int
+		patch int
+	)
+	fmt.Sscanf(v, "v%v.%v.%v", &major, &minor, &patch)
+	return fmt.Sprintf("%v.%v.%v", major, minor, patch)
 }
 
 // ----------------------------------------
